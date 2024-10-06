@@ -5,13 +5,16 @@ class BooksController < ApplicationController
   def show
     @book = Book.find(params[:id])
     @book_comment = BookComment.new
+    unless ReadCount.find_by(user_id: current_user.id, book_id: @book.id)
+      current_user.read_count.create(book_id: @book.id)
+    end
   end
 
   def index
     to  = Time.current.at_beginning_of_day
     from  = (to - 6.day).at_end_of_day
-    @books = Book.all.sort {|a,b| 
-      b.favorites.where(created_at: from...to).size <=> 
+    @books = Book.all.sort {|a,b|
+      b.favorites.where(created_at: from...to).size <=>
       a.favorites.where(created_at: from...to).size
     }
     @book = Book.new
